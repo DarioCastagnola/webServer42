@@ -1,6 +1,6 @@
 #include "TcpServer.hpp"
 
-TcpServer::TcpServer(std::string ip_address, int port): _ip_address(ip_address), _port(port), _socketAddress() {
+TcpServer::TcpServer(std::string ip_address, int port, char *file): _ip_address(ip_address), _port(port), _conf_file(file), _socketAddress() {
     std::cout << "TcpServer constructor called" << std::endl;
     this->_new_socket = 0;
     this->_socket = 0;
@@ -115,19 +115,27 @@ int TcpServer::acceptConnection(int &new_socket) {
 }
 
 std::string TcpServer::buildResponse() {
-	std::string htmlFile = "<!DOCTYPE html><html lang=\"en\"><body><h1> HOME </h1><p> Hello from your Server :) </p></body></html>";
+    std::ifstream configFile;
+    configFile.open(this->_conf_file);
+    if (!configFile) 
+		std::cout << "No such file" << std::endl;
+	std::string htmlFile;
+    getline(configFile, htmlFile);
+    configFile.close();
+    configFile.open(htmlFile.c_str());
+    if (!configFile) 
+		std::cout << "No such file" << std::endl;
+    getline(configFile, htmlFile);
 	std::ostringstream ss;
 	ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: " << htmlFile.size() << "\n\n"
 		<< htmlFile;
 
+    configFile.close();
 	return ss.str();
 }
 
 void TcpServer::sendResponse() {
 	long bytesSent;
-    std::cout << "START MESSAGE" << std::endl;
-    std::cout << this->_server_message.c_str() << std::endl;
-    std::cout << "FINISHED MESSAGE" << std::endl;
 	bytesSent = write(this->_new_socket, this->_server_message.c_str(), this->_server_message.size());
 
 	if (bytesSent == this->_server_message.size())

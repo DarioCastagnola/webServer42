@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <string>
 #include <cstring>
+#include <fstream>
 #include <sstream>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,7 +14,7 @@
 class TcpServer
 {
     public:
-        TcpServer(std::string ip_address, int port);
+        TcpServer(std::string ip_address, int port, char *file);
         ~TcpServer();
         int			startServer();
         int			closeServer();
@@ -22,6 +23,7 @@ class TcpServer
 		void		sendResponse();
 		std::string	buildResponse();
     private:
+        char                *_conf_file;
         std::string         _ip_address;
         int                 _socket;
         int                 _new_socket;
