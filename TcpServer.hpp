@@ -3,17 +3,24 @@
 #include <sys/socket.h>
 #include <string>
 #include <cstring>
+#include <sstream>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <arpa/inet.h>
+#define BUFFER_SIZE 30720
 
 class TcpServer
 {
     public:
         TcpServer(std::string ip_address, int port);
         ~TcpServer();
-        int     startServer();
-        void    closeServer();
+        int			startServer();
+        int			closeServer();
+        int			startListen();
+        int			acceptConnection(int &newsocket);
+		void		sendResponse();
+		std::string	buildResponse();
     private:
         std::string         _ip_address;
         int                 _socket;
