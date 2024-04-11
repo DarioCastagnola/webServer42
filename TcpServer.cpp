@@ -1,6 +1,6 @@
 #include "TcpServer.hpp"
 
-TcpServer::TcpServer(std::string ip_address, int port, char *file): _ip_address(ip_address), _port(port), _conf_file(file), _socketAddress() {
+TcpServer::TcpServer(std::string ip_address, int port, std::string file): _ip_address(ip_address), _port(port), _conf_file(file), _socketAddress() {
     std::cout << "TcpServer constructor called" << std::endl;
     this->_new_socket = 0;
     this->_socket = 0;
@@ -29,7 +29,7 @@ int TcpServer::startServer() {
     if (this->_socket < 0)
     {
         std::cerr << "Cannot create socket" << std::endl;
-        return -1;
+        exit(-1);
     }
     else
     {
@@ -38,7 +38,7 @@ int TcpServer::startServer() {
     if (bind(this->_socket,(sockaddr *)&this->_socketAddress, this->_socketAddress_len) < 0)
     {
         std::cerr << "Cannot bind socket to address: " << this->_ip_address << std::endl;
-        return -1;
+        exit(-1);
     }
     else
     {
@@ -89,7 +89,8 @@ int TcpServer::startListen() {
 			std::cerr << "Failed to read bytes from client socket connection" << std::endl;
 		std::ostringstream ss;
 		ss << "------ Received Request from client ------\n";
-		std::cout << ss.str() << std::endl;
+        ss << GREEN << "Request Content: " << buffer << std::endl; 
+		std::cout << ss.str() << RESET << std::endl;
 
 		sendResponse();
 
@@ -109,7 +110,7 @@ int TcpServer::acceptConnection(int &new_socket) {
         << inet_ntoa(this->_socketAddress.sin_addr) << "; PORT: " 
         << ntohs(this->_socketAddress.sin_port);
         std::cerr << ss.str() << std::endl;
-		return -1;
+	    exit (-1);
     }
 	return 0;
 }
@@ -125,7 +126,9 @@ std::string TcpServer::buildResponse() {
     configFile.open(htmlFile.c_str());
     if (!configFile) 
 		std::cout << "No such file" << std::endl;
-    getline(configFile, htmlFile);
+    std::stringstream buffer;
+    buffer << configFile.rdbuf();
+    htmlFile = buffer.str();
 	std::ostringstream ss;
 	ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: " << htmlFile.size() << "\n\n"
 		<< htmlFile;
